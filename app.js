@@ -6,12 +6,15 @@ const User = require("./models/User");
 const bcrypt = require("bcryptjs");
 // import jsonwebtoken to sign token
 const jwt = require("jsonwebtoken");
+const uuid4 = require("uuid4");
+var cors = require('cors')
 
 // This is an express app
 const app = express();
 
 // Use the express json parser middleware
 app.use(express.json());
+app.use(cors())
 
 // Logic goes here
 app.get("/", (req, res) => {
@@ -26,7 +29,7 @@ app.post("/register", async (req, res) => {
     
         // Validate user input
         if (!(email && password && first_name && last_name)) {
-          res.status(400).send("All input is required");
+          return res.status(400).send("All input is required");
         }
     
         // check if user already exist
@@ -42,6 +45,7 @@ app.post("/register", async (req, res) => {
     
         // Create user in our database
         const user = await User.create({
+          user_id: uuid4(),
           first_name,
           last_name,
           email: email.toLowerCase(), // sanitize: convert email to lowercase
@@ -50,7 +54,7 @@ app.post("/register", async (req, res) => {
     
         // Create token
         const token = await jwt.sign(
-          { user_id: user._id, email },
+          { user_id: user.user_id, email },
           "thisisatokenkey",
           {
             expiresIn: "2h",
@@ -61,7 +65,7 @@ app.post("/register", async (req, res) => {
         user.save();
     
         // return new user
-        res.status(201).json(user);
+        res.status(200).json(user);
       } catch (err) {
         console.log(err);
       }
