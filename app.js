@@ -65,10 +65,55 @@ app.post("/register", async (req, res) => {
         user.save();
     
         // return new user
-        res.status(200).json(user);
+        return res.status(200).json(user);
       } catch (err) {
         console.log(err);
       }
+})
+
+app.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Validate user input
+    if (!(email && password)) {
+      return res.status(400).send("All input is required");
+    }
+
+    // Validate if user exist in our database
+    const user = await User.findOne({ email: email });
+
+    if (!user) {
+      return res.status(409).send("User does not exist. Please register");
+    }
+
+    // Validate user password
+    const validPassword = await bcrypt.compare(password, user.password);
+
+    if (!validPassword) {
+      return res.status(400).send("Invalid Username Or Password");
+    }
+
+    // Create token
+    const token = await jwt.sign(
+      { user_id: user.user_id, email },
+      "thisisatokenkey",
+      {
+        expiresIn: "2h",
+      }
+    );
+
+    // save user token
+    user.token = token;
+    user.save();
+
+    // user
+    return res.status(200).json(user);
+
+
+  } catch (err) {
+    console.log(err);
+  }
 })
 
 module.exports = app;
