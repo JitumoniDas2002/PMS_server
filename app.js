@@ -2,6 +2,7 @@ require("dotenv").config();
 require("./config/database").connect();
 const express = require("express");
 const User = require("./models/User");
+const Publication = require("./models/Publication");
 // import bcrypt to hash password
 const bcrypt = require("bcryptjs");
 // import jsonwebtoken to sign token
@@ -110,6 +111,25 @@ app.post("/login", async (req, res) => {
     // user
     return res.status(200).json(user);
 
+
+  } catch (err) {
+    console.log(err);
+  }
+})
+
+app.post("/add-publications", async (req, res) => {
+  try {
+    const { title, author, co_authors, file } = req.body
+
+    const publication = await Publication.create({
+      publication_id: uuid4(),
+      title,
+      author,
+      co_authors,
+      file
+    })
+
+    return res.status(200).json(publication);
 
   } catch (err) {
     console.log(err);
