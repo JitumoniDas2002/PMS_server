@@ -119,10 +119,11 @@ app.post("/login", async (req, res) => {
 
 app.post("/add-publications", async (req, res) => {
   try {
-    const { title, author, co_authors, file } = req.body
+    const { title, author, co_authors, file, user_id } = req.body
 
     const publication = await Publication.create({
       publication_id: uuid4(),
+      user_id,
       title,
       author,
       co_authors,
@@ -130,6 +131,21 @@ app.post("/add-publications", async (req, res) => {
     })
 
     return res.status(200).json(publication);
+
+  } catch (err) {
+    console.log(err);
+  }
+})
+
+app.get(`/get-publications/:userid`, async (req, res) => {
+  const userId = req.params.userid
+  try {
+
+    const publications = await Publication.find({
+      "user_id": userId
+    })
+
+    return res.status(200).json(publications);
 
   } catch (err) {
     console.log(err);

@@ -6,6 +6,11 @@ const publicationSchema = new mongoose.Schema({
         default: null,
         required: true
     },
+    user_id: {
+        type: String,
+        default: null,
+        required: true
+    },
     title: {
         type: String,
         default: null,
