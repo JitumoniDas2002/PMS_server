@@ -119,7 +119,7 @@ app.post("/login", async (req, res) => {
 
 app.post("/add-publications", async (req, res) => {
   try {
-    const { title, author, co_authors, file, user_id } = req.body
+    const { title, author, co_authors, file, user_id, description } = req.body
 
     const publication = await Publication.create({
       publication_id: uuid4(),
@@ -127,10 +127,23 @@ app.post("/add-publications", async (req, res) => {
       title,
       author,
       co_authors,
-      file
+      file,
+      description
     })
 
     return res.status(200).json(publication);
+
+  } catch (err) {
+    console.log(err);
+  }
+})
+
+app.get(`/get-publications`, async (req, res) => {
+  try {
+
+    const publications = await Publication.find({})
+
+    return res.status(200).json(publications);
 
   } catch (err) {
     console.log(err);
