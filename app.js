@@ -152,4 +152,20 @@ app.get(`/get-publications/:userid`, async (req, res) => {
   }
 })
 
+app.delete(`/delete-publication/:publicationid`, async (req, res) => {
+  const publicationId = req.params.publicationid
+  try {
+
+    const publication = await Publication.findOneAndDelete({
+      "publication_id": publicationId
+    })
+
+    return res.status(200).json(publication);
+
+  } catch (err) {
+    console.log(err);
+  }
+
+})
+
 module.exports = app;
