@@ -28,7 +28,7 @@ const publicationSchema = new mongoose.Schema({
     },
     published_date: {
         type: String,
-        default: Date.now(),
+        default: null,
         required: false
     },
     description: {

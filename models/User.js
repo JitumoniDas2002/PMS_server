@@ -14,6 +14,11 @@ const userSchema = new mongoose.Schema({
         type: String, 
         default: null 
     },
+    username: {
+        type: String,
+        default: null,
+        unique: true
+    },
     email: { 
         type: String, 
         unique: true 
@@ -24,6 +29,11 @@ const userSchema = new mongoose.Schema({
     token: { 
         type: String 
     },
+    publications: {
+        type: [String],
+        default: null,
+        required: false
+    }
 });
 
 module.exports = mongoose.model("user", userSchema);
