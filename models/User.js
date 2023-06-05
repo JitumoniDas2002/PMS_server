@@ -33,6 +33,10 @@ const userSchema = new mongoose.Schema({
         type: [String],
         default: null,
         required: false
+    },
+    register_date: {
+        type: Date,
+        default: Date.now
     }
 });
 
