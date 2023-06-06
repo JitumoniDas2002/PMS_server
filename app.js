@@ -9,6 +9,8 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const uuid4 = require("uuid4");
 var cors = require('cors')
+const multer = require('multer');
+const path = require('path');
 
 // This is an express app
 const app = express();
@@ -120,7 +122,19 @@ app.post("/login", async (req, res) => {
 
 app.post("/add-publications", async (req, res) => {
   try {
-    const { title, author, co_authors, file, user_id, description } = req.body
+    const { title, author, co_authors, user_id, description, published_date } = req.body
+
+    // const file_name = file.originalname;
+    // const file_path = path.join(__dirname, file.path);
+
+    // file = {
+    //   file_name,
+    //   file_path
+    // }
+
+    const user = await User.findOne({ user_id: user_id });
+
+    console.log(user);
 
     const publication = await Publication.create({
       publication_id: uuid4(),
@@ -128,8 +142,9 @@ app.post("/add-publications", async (req, res) => {
       title,
       author,
       co_authors,
-      file,
-      description
+      description,
+      email: user.email,
+      published_date
     })
 
     return res.status(200).json(publication);
@@ -151,12 +166,40 @@ app.get(`/get-publications`, async (req, res) => {
   }
 })
 
+app.get(`/get-total-publications`, async (req, res) => {
+  try {
+
+    const publications = await Publication.find({})
+
+    return res.status(200).json(publications.length);
+
+  } catch (err) {
+    console.log(err);
+  }
+})
+
 app.get(`/get-publications/:userid`, async (req, res) => {
   const userId = req.params.userid
   try {
 
     const publications = await Publication.find({
       "user_id": userId
+    })
+
+    return res.status(200).json(publications);
+
+  } catch (err) {
+    console.log(err);
+  }
+})
+
+app.get(`/get-publications-email/:email`, async (req, res) => {
+  const email = req.params.email
+  console.log(email);
+  try {
+
+    const publications = await Publication.find({
+      "email": email
     })
 
     return res.status(200).json(publications);
@@ -188,6 +231,42 @@ app.get(`/get-users`, async (req, res) => {
     const users = await User.find({})
 
     return res.status(200).json(users);
+
+  } catch (err) {
+    console.log(err);
+  }
+})
+
+app.get(`/get-user/:userid`, async (req, res) => {
+  const userId = req.params.userid
+  try {
+    const user = await User.findOne({
+      "user_id": userId
+    })
+
+    return res.status(200).json(user);
+  } catch (err) {
+    console.log(err);
+  }
+})
+
+// update user
+app.put(`/update-user/:userid`, async (req, res) => {
+  const userId = req.params.userid
+
+  const { first_name, last_name } = req.body;
+
+  try {
+    const user = await User.findOne({
+      "user_id": userId
+    })
+    
+    user.first_name = first_name
+    user.last_name = last_name
+
+    user.save()
+
+    return res.status(200).json(user);
 
   } catch (err) {
     console.log(err);

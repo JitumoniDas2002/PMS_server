@@ -1,5 +1,18 @@
 const mongoose = require("mongoose");
 
+fileSchema = new mongoose.Schema({
+    file_name: {
+        type: String,
+        default: null,
+        required: true
+    },
+    file_path: {
+        type: String,
+        default: null,
+        required: true
+    }
+})
+
 const publicationSchema = new mongoose.Schema({
     publication_id: {
         type: String,
@@ -7,6 +20,11 @@ const publicationSchema = new mongoose.Schema({
         required: true
     },
     user_id: {
+        type: String,
+        default: null,
+        required: true
+    },
+    email: {
         type: String,
         default: null,
         required: true
@@ -34,7 +52,12 @@ const publicationSchema = new mongoose.Schema({
     description: {
         type: String,
         default: null,
-    }
+    },
+    file: {
+        type: [fileSchema],
+        default: null,
+        required: false
+    },
 
 })
 
