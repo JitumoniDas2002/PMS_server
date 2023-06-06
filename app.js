@@ -3,6 +3,7 @@ require("./config/database").connect();
 const express = require("express");
 const User = require("./models/User");
 const Publication = require("./models/Publication");
+const Admin = require("./models/Admin");
 // import bcrypt to hash password
 const bcrypt = require("bcryptjs");
 // import jsonwebtoken to sign token
@@ -113,6 +114,57 @@ app.post("/login", async (req, res) => {
 
     // user
     return res.status(200).json(user);
+
+
+  } catch (err) {
+    console.log(err);
+  }
+})
+
+app.post("admin-login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Validate user input
+    if (!(email && password)) {
+      return res.status(400).send("All input is required");
+    }
+
+    // Validate if user exist in our database
+    const admin = await Admin.findOne({ email: email });
+
+    if (!admin) {
+      return res.status(409).send("User does not exist. Please register");
+    }
+
+    // Validate user password
+    // const validPassword = await bcrypt.compare(password, user.password);
+
+    // if (!validPassword) {
+    //   return res.status(400).send("Invalid Username Or Password");
+    // }
+
+    const validPassword = password === admin.password;
+
+    if (!validPassword) {
+      return res.status(400).send("Invalid Username Or Password");
+    }
+
+    // Create token
+    const token = await jwt.sign(
+      { admin_id: admin.admin_id, email },
+      "thisisatokenkey",
+      {
+        expiresIn: "2h",
+      }
+    );
+
+    // save user token
+    admin.token = token;
+    admin.save();
+
+    // user
+    return res.status(200).json(admin);
 
 
   } catch (err) {
