@@ -136,8 +136,14 @@ app.post("/add-publications", async (req, res) => {
 
     console.log(user);
 
+    const publication_id = uuid4();
+
+    user.publications.push(publication_id);
+
+    user.save();
+
     const publication = await Publication.create({
-      publication_id: uuid4(),
+      publication_id: publication_id,
       user_id,
       title,
       author,
