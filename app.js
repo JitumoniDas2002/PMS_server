@@ -121,7 +121,7 @@ app.post("/login", async (req, res) => {
   }
 })
 
-app.post("admin-login", async (req, res) => {
+app.post("/admin-login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
