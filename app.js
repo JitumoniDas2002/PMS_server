@@ -12,6 +12,7 @@ const uuid4 = require("uuid4");
 var cors = require('cors')
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 
 // This is an express app
 const app = express();
@@ -19,6 +20,17 @@ const app = express();
 // Use the express json parser middleware
 app.use(express.json());
 app.use(cors())
+
+const storage = multer.diskStorage({
+  destination: 'uploads/',
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const extension = path.extname(file.originalname);
+    cb(null, file.fieldname + '-' + uniqueSuffix + extension);
+  }
+});
+
+const upload = multer({ storage: storage });
 
 // Logic goes here
 app.get("/", (req, res) => {
@@ -172,17 +184,16 @@ app.post("/admin-login", async (req, res) => {
   }
 })
 
-app.post("/add-publications", async (req, res) => {
+app.post("/add-publications", upload.single('file'), async (req, res) => {
   try {
     const { title, author, co_authors, user_id, description, published_date } = req.body
 
-    // const file_name = file.originalname;
-    // const file_path = path.join(__dirname, file.path);
-
-    // file = {
-    //   file_name,
-    //   file_path
-    // }
+    if (!req.file) {
+      return res.status(400).send('No file uploaded.');
+    }
+    const filePath = req.file.path;
+    const fileName = req.file.filename;
+    console.log(req.file);
 
     const user = await User.findOne({ user_id: user_id });
 
@@ -200,6 +211,7 @@ app.post("/add-publications", async (req, res) => {
       title,
       author,
       co_authors,
+      file: fileName,
       description,
       email: user.email,
       published_date
@@ -209,8 +221,27 @@ app.post("/add-publications", async (req, res) => {
 
   } catch (err) {
     console.log(err);
+    return res.status(500).json({ error: "Internal server error" });
   }
 })
+
+app.get('/download/:filename', (req, res) => {
+  const filename = req.params.filename;
+  const filePath = path.join(__dirname, 'uploads', filename);
+
+  // Check if the file exists
+  if (fs.existsSync(filePath)) {
+    // Set the appropriate headers
+    res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
+    res.setHeader('Content-Type', 'application/octet-stream');
+
+    // Create a read stream from the file and pipe it to the response
+    const fileStream = fs.createReadStream(filePath);
+    fileStream.pipe(res);
+  } else {
+    res.status(404).send('File not found');
+  }
+});
 
 app.get(`/get-publications`, async (req, res) => {
   try {

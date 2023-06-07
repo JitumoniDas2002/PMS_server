@@ -54,7 +54,7 @@ const publicationSchema = new mongoose.Schema({
         default: null,
     },
     file: {
-        type: [fileSchema],
+        type: String,
         default: null,
         required: false
     },
